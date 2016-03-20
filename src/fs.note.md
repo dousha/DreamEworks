@@ -11,7 +11,7 @@ advance.
 You can found the hard drive image editor binary in `dist/hosttools/edhd`.
 The binary is bulit on openSUSE 42.1 x86_64. If you want to build this tool,
 the corresponding source code can be found in `src/hosttools/edhd.c`. *Build
-it with HOST gcc unless you are doing.*
+it with HOST gcc unless you know what you are doing.*
 
 -------------------------------------------------------------------------------
 
