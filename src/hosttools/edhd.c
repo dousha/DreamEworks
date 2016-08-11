@@ -1,9 +1,16 @@
+/**
+ * edhd.c
+ * 
+ * QDFS disk image editing tool
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 FILE* mbr;
 FILE* temp;
@@ -67,7 +74,7 @@ void init(){
 		// create the fs table
 		strncpy(fs_table->name, fsTableStr, 16);
 		fs_table->offset = 0;
-		fs_table->size = sizeof(record) * 1024;
+		fs_table->size = sizeof(record) * 256;
 		fs_table->attribute = 0xDB;
 		fs_table->timestamp = 0;
 		rewind(img);
@@ -240,23 +247,19 @@ void cp_worker(FILE* file, const char* name){
 	free(fsTableStr);
 }
 
-void host_cp(){
+void host_cp(const char* host, const char* slave){
 	FILE *hfp;
-	printf("Host path: ");
-	scanf("%s", input_buffer);
-	hfp = fopen(input_buffer, "r");
+	hfp = fopen(host, "r");
 	if(hfp == NULL){
 		printf("Cannot open this file!");
 		return;
 	}
-	printf("Slave path: ");
-	scanf("%s", input_buffer);
-	if(strlen(input_buffer) == 0){
+	if(strlen(slave) == 0){
 		printf("You have to name this file.\n");
 		printf("Abort.\n");
 		return;
 	}
-	if(test_conflict(input_buffer)){
+	if(test_conflict(slave)){
 		printf("Well, this file does exist.\n");
 		printf("Rename it?[Y/n]");
 		char choice = getchar();
@@ -288,7 +291,7 @@ void host_cp(){
 			return;
 		}
 	}else{
-		cp_worker(hfp, input_buffer);
+		cp_worker(hfp, slave);
 	}
 	fclose(hfp);
 	fflush(img);
@@ -301,7 +304,17 @@ void cp(){
 	// zero, the "copy" would stay intact
 	// UNLESS
 	// there's a safe_rm option...
-
+	char* src;
+	char* dest;
+	src = malloc(sizeof(char) * 255);
+	dest = malloc(sizeof(char) * 255);
+	printf("Source: ");
+	scanf("%s", src);
+	printf("Dest: ");
+	scanf("%s", dest);
+	
+	free(src);
+	free(dest);
 }
 
 void mkdir(){
@@ -336,12 +349,10 @@ void rm_worker(const char* name){
 	free(fileName);
 }
 
-void rm(){
+void rm(const char* name){
 	// delete
 	int foundFlag = 0;
-	printf("Filename: ");
-	scanf("%s", input_buffer);
-	rm_worker(input_buffer);
+	rm_worker(name);
 }
 
 void concat(){
@@ -359,7 +370,7 @@ void updateMBR(){
 
 int main(int argc, char** argv){
 	init();
-	while((c = getchar()) != '\0'){
+	while((c = getopt(argc, argv, "lur:p")) != -1){
 		switch(c){
 			case 'l':
 				ls();
@@ -368,21 +379,18 @@ int main(int argc, char** argv){
 				cp();
 				break;
 			case 'p':
-				host_cp();
+				host_cp(argv[2], argv[3]);
 				break;
 			case 'r':
-				rm();
+				rm(optarg);
 				break;
 			case 'u':
 				updateMBR();
 				break;
-			case 'q':
-				goto quit;
 			default:
 				break;
 		}
 	}
-quit:
 	finalize();
 	return 0;
 }

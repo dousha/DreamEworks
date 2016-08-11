@@ -1,15 +1,56 @@
-ipl.bin : ipl.asm Makefile
-	../z_tools/nask.exe ipl.asm ipl.bin
+AS=nasm
+GAS=i686-elf-as
+CC=i686-elf-gcc
+LD=i686-elf-ld
 
-dmwk.img : ipl.bin Makefile
-	../z_tools/edimg.exe imgin:fdimg0at.tek wbinimg src:ipl.bin len:512 from:0 to:0 imgout:dmwk.img
-	
-all:
-	make exu
+ASM_FLAG=-f elf
+ASM_SRC=stage2.asm hybintf.asm
+ASM_OBJ=$(ASM_SRC:.asm=.o)
+ASM_TARGET=bl.bin
+C_SRC=screen.c kern.c memutils.c utils.c string.c
+C_DEP=vga.h hybintf.h memutils.h utils.h string.h
+C_OBJ=$(C_SRC:.c=.o)
+C_FLAG=-std=gnu99 -ffreestanding -O2 -Os -Wall -Wextra
+TOTAL_TARGET=kernel.pkg
 
-exu :
-	make -r dmwk.img
-	make run
+LINKER=linker.ld
 
-run :
-	qemu-system-i386 -m 32 -localtime -fda dmwk.img
+EX_DEP=hosttools/edhd
+
+TARGET=hosttools/hd.img
+
+default:
+	make all
+
+run: $(TARGET)
+	cd hosttools; \
+	qemu-system-i386 -fda hd.img -monitor stdio;
+
+dbg: $(TARGET)
+	bochs -q 'boot:a' 'floppya: 1_44=./$(TARGET), status=inserted'
+
+all: $(TOTAL_TARGET) $(C_DEP) $(EX_DEP)
+	cp bl.bin hosttools/mbr.bin
+	cp kernel.pkg hosttools/
+	cd hosttools; \
+	./edhd -u; \
+	./edhd -r kern; \
+	./edhd -p kernel.pkg kern;
+
+clean:
+	rm -rf $(ASM_TARGET) $(ASM_OBJ) $(C_OBJ)
+
+kernel.pkg : $(ASM_OBJ) $(C_OBJ) $(ASM_TARGET)
+	$(CC) $(C_FLAG) -nostdlib -lgcc -T $(LINKER) -o $@ $(ASM_OBJ) $(C_OBJ)
+
+%.o : %.asm
+	$(AS) -f elf -o $@ $<
+
+%.o : %.c
+	$(CC) $(C_FLAG) -c -o $@ $<
+
+bl.bin : bl.asm
+	$(AS) -f bin -o $@ $<
+
+hosttools/edhd: hosttools/edhd.c hosttools/Makefile
+	cd hosttools; make;

@@ -1,26 +1,38 @@
-ENTRY(_stage2)
+ENTRY(entry)
 OUTPUT_FORMAT(binary)
 SECTIONS
 {
-	.text ALIGN(4K)
+	. = 0xd200;
+
+	.text : 
 	{
 		*(.text)
 	}
 
-	.rodata ALIGN(4K)
+	.gdt :
+	{
+		*(.gdt)
+	}
+
+	.idt :
+	{
+		*(.idt)
+	}
+
+	.rodata : 
 	{
 		*(.rodata)
 	}
 
-	.data ALIGN(4K)
+	.data : 
 	{
 		*(.data)
 	}
 
-	.bss ALIGN(4K)
+	.bss : 
 	{
 		*(COMMON)
 		*(.bss)
-		*(.stage2_stack)
+		*(.boot_stack)
 	}
 }
