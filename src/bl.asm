@@ -7,7 +7,7 @@
 [org 0x7c00]
 
 TOTAL_CYLINDERS equ 10 ; how many cylinders do we want to read?
-; 1 cylinder = 2 x 18 sectors = 2 x 18 x 512 Bytes
+; 1 cylinder = 2 x 18 sectors = 2 x 18 x 512 bytes = 18432 bytes
 
 _stage1:
 mov sp, 0x7c00 ; stack rasies upwards, 0x500 ~ 0x7bff are free

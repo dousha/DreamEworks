@@ -5,10 +5,30 @@
 
 /// the corresponing code is hybintf.asm
 
-extern void write_graphics(uint16_t, uint32_t);
-extern void memfill_l(uint32_t, uint32_t, uint32_t);
-
 extern void io_hlt();
+extern void io_sti();
+extern void io_cli();
+
+extern uint8_t io_in8(uint16_t);
+extern uint16_t io_in16(uint16_t);
+extern uint32_t io_in32(uint16_t);
+
+/// it would break if I explicitly use
+/// uintx_t
+/// trust me
+/// maybe because of compiler optimization
+/// that made everything aligned to 4bytes
+/// so the stack goes wried?
+extern void io_out8(int, int);
+extern void io_out16(int, int);
+extern void io_out32(int, int);
+
+extern uint32_t io_eflags_read();
+extern void io_eflags_write(uint32_t);
+extern uint32_t io_idtr_read();
+extern void io_idtr_write(uint32_t);
+
+extern void io_int_user();
 
 #endif
 

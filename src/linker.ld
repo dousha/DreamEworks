@@ -4,7 +4,7 @@ SECTIONS
 {
 	. = 0xd200;
 
-	.text : 
+	.text :
 	{
 		*(.text)
 	}
@@ -33,6 +33,5 @@ SECTIONS
 	{
 		*(COMMON)
 		*(.bss)
-		*(.boot_stack)
 	}
 }

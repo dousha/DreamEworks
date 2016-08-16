@@ -4,11 +4,13 @@ CC=i686-elf-gcc
 LD=i686-elf-ld
 
 ASM_FLAG=-f elf
-ASM_SRC=stage2.asm hybintf.asm
+ASM_SRC=stage2.asm hybintf.asm intrupt.asm
 ASM_OBJ=$(ASM_SRC:.asm=.o)
 ASM_TARGET=bl.bin
-C_SRC=screen.c kern.c memutils.c utils.c string.c
-C_DEP=vga.h hybintf.h memutils.h utils.h string.h
+C_SRC=screen.c kern.c memutils.c utils.c string.c memory.c \
+interrupts.c idt.c
+C_DEP=vga.h hybintf.h memutils.h utils.h string.h memory.h \
+interrupts.h idt.h
 C_OBJ=$(C_SRC:.c=.o)
 C_FLAG=-std=gnu99 -ffreestanding -O2 -Os -Wall -Wextra
 TOTAL_TARGET=kernel.pkg

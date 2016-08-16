@@ -1,6 +1,6 @@
 ; stage2
 
-global entry
+global entry, GDTR0, IDTR0
 extern c_kern
 
 [section .gdt]
@@ -70,7 +70,8 @@ SELECTOR_STACK equ DESCRIPTOR_STACK - GDT0
 [section .idt]
 ; idts are defined here
 IDT_DESC_START:
-
+resb 256 * 8 ; populate with empty table and rewrite it
+; with init_idt in idt.c
 IDT_DESC_END:
 
 IDTR0:
@@ -94,7 +95,8 @@ or al, 0x02
 and al, ~1
 out 0x92, al
 ; goto protected mode
-; rewrite code descriptor
+; load the idt
+lidt [IDTR0]
 ; load the gdt
 lgdt [GDTR0]
 mov eax, cr0

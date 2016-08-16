@@ -50,7 +50,7 @@ void memmove_b(uint8_t* from, uint8_t* to, size_t n){
 uint64_t mem_probe(){
 	// the probing process is actually done by bootloader
 	// memory information were stored in 0x7e00
-	int entryCount = *((int*) 0x1000);z
+	int entryCount = *((int*) 0x1000);
 	entryCount -= 0x7e00;
 	entryCount /= 20;
 	entryCount++;
