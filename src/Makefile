@@ -8,9 +8,9 @@ ASM_SRC=stage2.asm hybintf.asm intrupt.asm
 ASM_OBJ=$(ASM_SRC:.asm=.o)
 ASM_TARGET=bl.bin
 C_SRC=screen.c kern.c memutils.c utils.c string.c memory.c \
-interrupts.c idt.c
+interrupts.c idt.c keyboard.c task.c gdt.c
 C_DEP=vga.h hybintf.h memutils.h utils.h string.h memory.h \
-interrupts.h idt.h
+interrupts.h idt.h keyboard.h task.h gdt.h
 C_OBJ=$(C_SRC:.c=.o)
 C_FLAG=-std=gnu99 -ffreestanding -O2 -Os -Wall -Wextra
 TOTAL_TARGET=kernel.pkg

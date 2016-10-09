@@ -54,26 +54,26 @@ uint64_t mem_probe(){
 	entryCount -= 0x7e00;
 	entryCount /= 20;
 	entryCount++;
-	char buf[20];
+	//char buf[20];
 	mem_record* curMemRec = (mem_record*) 0x7e00;
 	uint64_t base = 0; ///< MAGIC! DO NOT TOUCH!
 	uint64_t size = 0;
-	puts("Probing memory...\n");
-	itoa(buf, entryCount, 10);
-	puts("Entry count: "); puts(buf); putchar('\n');
+	puts("[Memutil] Probing memory...\n");
+	//itoa(buf, entryCount, 10);
+	//puts("Entry count: "); puts(buf); putchar('\n');
 	while(entryCount > 0){
-		itoa(buf, curMemRec->base, HEX);
-		puts(buf); putchar('\t');
-		itoa(buf, curMemRec->size, HEX);
-		puts(buf); putchar('\t');
+		//itoa(buf, curMemRec->base, HEX);
+		//puts(buf); putchar('\t');
+		//itoa(buf, curMemRec->size, HEX);
+		//puts(buf); putchar('\t');
 		switch(curMemRec->type){
 			case 1:
-				puts("Free\n");
+				//puts("Free\n");
 				base = curMemRec->base;
 				size = curMemRec->size;
 				break;
 			default:
-				puts("Used\n");
+				//puts("Used\n");
 				break;
 		}
 		++curMemRec;

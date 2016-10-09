@@ -8,8 +8,7 @@ void itoa(char* buf, long num, int base){
 	if(num < 0 && base == 10){
 		sig = 1;
 	}
-	int j = 0;
-	int k = 0;
+	register int j = 0, k = 0;
 	if(sig > 0){
 		i2 = -i2;
 		if(i2 == 0){
@@ -48,6 +47,17 @@ num_is_zero:
 		buf[j] = '0';
 		j++;
 	}
+	else if(base == 8){
+		buf[j] = '0';
+		j++;
+	}
+	else if(base == 2){
+		buf[j] = 'b';
+		j++;
+		buf[j] = '0';
+		j++;
+	}
 	buf[j] = 0;
 	strfilp(buf);
 }
+

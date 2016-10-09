@@ -8,6 +8,7 @@
 extern void io_hlt();
 extern void io_sti();
 extern void io_cli();
+extern void io_stihlt();
 
 extern uint8_t io_in8(uint16_t);
 extern uint16_t io_in16(uint16_t);
@@ -27,6 +28,9 @@ extern uint32_t io_eflags_read();
 extern void io_eflags_write(uint32_t);
 extern uint32_t io_idtr_read();
 extern void io_idtr_write(uint32_t);
+extern uint32_t io_gdtr_read();
+extern void io_gdtr_write(uint32_t);
+extern void io_load_tss();
 
 extern void io_int_user();
 

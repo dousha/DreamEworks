@@ -1,8 +1,15 @@
 global int_dummy
 global int_kbd, int_timer, int_task_tick, int_user_0x80
-global init_8259a
+global init_8259a, init_pit
+global int_e_div, int_e_dbg, int_e_nmi, int_e_bp, int_e_overflow
+global int_e_bound, int_e_undef, int_e_no_math, int_e_double_fault
+global int_e_aux_bound, int_e_invalid_tss, int_e_not_present, int_e_stack_segment
+global int_e_general_protection, int_e_page_fault, int_e_reserved
+global int_e_math_fault, int_e_align_check, int_e_machine_check
+global int_e_sse_fault
 
 extern int_kbd_hwnd, int_timer_hwnd, int_task_tick_hwnd, int_user_0x80_hwnd
+extern int_exception_hwnd
 
 [section .text]
 io_delay:
@@ -77,7 +84,7 @@ init_8259a:
 	; lpt2: int 25
 	; flp: int 26
 	; ???: int 27
-	mov al, 0b11111101 ; kbd
+	mov al, 0b11111100 ; kbd
 			;0b11111110 ; timer interrupt only
 			;0b11111111 ; no interrupt
 	out 0x21, al ; main, ocw1
@@ -89,6 +96,116 @@ init_8259a:
 
 	pop ax
 	ret
+
+;init_pit:
+;	push eax
+;	push edx
+;	xor eax, eax
+;	mov al, 0b00110100
+;	mov dx, 0x43
+;	out dx, al
+;	mov ax, 0x04aa
+;	mov dx, 0x40
+;	out dx, ax
+;	pop edx
+;	pop eax
+;	ret
+
+init_pit: ; 11932, 100Hz (approx)
+	push eax
+	push edx
+	xor eax, eax
+	xor edx, edx
+	mov dx, 0x43
+	mov ax, 0x34
+	out dx, al
+	mov dx, 0x40
+	mov al, 0x9c
+	out dx, al
+	mov al, 0x2e
+	out dx, al
+	pop edx
+	pop eax
+	ret
+
+int_e_div:
+	push 0xffffffff
+	push 0
+	jmp int_ex
+int_e_dbg:
+	push 0xffffffff
+	push 1
+	jmp int_ex
+int_e_nmi:
+	push 0xffffffff
+	push 2
+	jmp int_ex
+int_e_bp:
+	push 0xffffffff
+	push 3
+	jmp int_ex
+int_e_overflow:
+	push 0xffffffff
+	push 4
+	jmp int_ex
+int_e_bound:
+	push 0xffffffff
+	push 5
+	jmp int_ex
+int_e_undef:
+	push 0xffffffff
+	push 6
+	jmp int_ex
+int_e_no_math:
+	push 0xffffffff
+	push 7
+	jmp int_ex
+int_e_double_fault:
+	push 8
+	jmp int_ex
+int_e_aux_bound:
+	push 0xffffffff
+	push 9
+	jmp int_ex
+int_e_invalid_tss:
+	push 10
+	jmp int_ex
+int_e_not_present:
+	push 11
+	jmp int_ex
+int_e_stack_segment:
+	push 12
+	jmp int_ex
+int_e_general_protection:
+	push 13
+	jmp int_ex
+int_e_page_fault:
+	push 14
+	jmp int_ex
+int_e_reserved:
+	push 0xffffffff
+	push 15
+	jmp int_ex
+int_e_math_fault:
+	push 0xffffffff
+	push 16
+	jmp int_ex
+int_e_align_check:
+	push 17
+	jmp int_ex
+int_e_machine_check:
+	push 0xffffffff
+	push 18
+	jmp int_ex
+int_e_sse_fault:
+	push 0xffffffff
+	push 19
+	jmp int_ex
+int_ex:
+	call int_exception_hwnd
+	add esp, 4 * 2
+	cli
+	hlt
 
 int_dummy:
 	; just do absolutely nothing, ok?
@@ -108,6 +225,14 @@ int_timer:
 	iretd
 
 int_task_tick:
+	cli
+	pushad ; push everything in stack
+	; the code above actually sent a tss to the C handler
+	call int_task_tick_hwnd
+	; now load the new tss
+	mov ax, 0x28
+	ltr ax ; load tss
+	sti
 	iret
 
 int_user_0x80:

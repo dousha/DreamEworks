@@ -1,6 +1,7 @@
 ; stage2
 
 global entry, GDTR0, IDTR0
+global SELECTOR_CODE, SELECTOR_DATA, SELECTOR_STACK, SELECTOR_TSS
 extern c_kern
 
 [section .gdt]
@@ -44,7 +45,7 @@ DESCRIPTOR_VIDEO:
 dw 0xffff
 dw 0x8000
 db 0x0b
-db 0b10010011
+db 0b11010011 ; ring3
 db 0b01001111
 db 0x00
 
@@ -56,6 +57,38 @@ db 0b10010111
 db 0b01000000
 db 0x00
 
+DESCRIPTOR_TSS: ; need to be inited after kernel loaded
+dw 0
+dw 0
+db 0
+db 0
+db 0
+db 0
+
+DESCRIPTOR_USER_CODE:
+dw 0
+dw 0
+db 0
+db 0
+db 0
+db 0
+
+DESCRIPTOR_USER_DATA:
+dw 0
+dw 0
+db 0
+db 0
+db 0
+db 0
+
+DESCRIPTOR_LDT:
+dw 0
+dw 0
+db 0
+db 0
+db 0
+db 0
+
 GDT_DESC_END:
 
 GDTR0:
@@ -66,6 +99,10 @@ SELECTOR_CODE equ DESCRIPTOR_CODE - GDT0
 SELECTOR_DATA equ DESCRIPTOR_DATA - GDT0
 SELECTOR_VIDEO equ DESCRIPTOR_VIDEO - GDT0
 SELECTOR_STACK equ DESCRIPTOR_STACK - GDT0
+SELECTOR_TSS equ DESCRIPTOR_TSS - GDT0
+SELECTOR_USER_CODE equ DESCRIPTOR_USER_CODE - GDT0
+SELECTOR_USER_DATA equ DESCRIPTOR_USER_DATA - GDT0
+SELECTOR_LDT equ DESCRIPTOR_LDT - GDT0
 
 [section .idt]
 ; idts are defined here

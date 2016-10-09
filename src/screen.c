@@ -32,6 +32,10 @@ void set_pos(uint16_t newx, uint16_t newy){
 	}
 }
 
+void set_color(enum VGA_COLOR fg, enum VGA_COLOR bg){
+	curColor = make_color(fg, bg);
+}
+
 void roll_screen(){
 	memmove_b((uint8_t*) 0xb8000 + SCREEN_WIDTH * 2,
 				(uint8_t*) 0xb8000,
@@ -64,7 +68,14 @@ void putchar(char c){
 			break;
 		case '\b':
 			if(curX == 0) break;
-			else --curX;
+			else{
+				--curX;
+				putchar(' ');
+				--curX;
+			}
+			break;
+		case '\r':
+			curX = 0;
 			break;
 		default:
 			vram[calc_offset(curX, curY)] =
@@ -90,7 +101,8 @@ void puts(const char* str){
 
 void clrscr(){
 	// TODO: support multiple modes
-	memfill_w(vram, 80 * 24, 0);
+	memfill_w(vram, SCREEN_WIDTH * SCREEN_HEIGHT, make_vga_entry(curColor, ' '));
+	set_pos(0, 0);
 }
 
 void term_init(){

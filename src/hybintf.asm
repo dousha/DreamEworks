@@ -1,13 +1,17 @@
 ; hybird interface
 
 extern IDTR0
+extern GDTR0
+extern SELECTOR_TSS
 
-global io_hlt, io_cli, io_sti
+global io_hlt, io_cli, io_sti, io_stihlt
 global io_out8, io_out16, io_out32
 global io_in8, io_in16, io_in32
 global io_eflags_read, io_eflags_write
 global io_idtr_read, io_idtr_write
 global io_int_user
+global io_gdtr_read, io_gdtr_write
+global io_load_tss
 
 [section .text]
 io_in8:
@@ -92,6 +96,11 @@ io_sti:
 	sti
 	ret
 
+io_stihlt:
+	sti
+	hlt
+	ret
+
 io_idtr_read:
 ; idtr*
 	mov eax, IDTR0
@@ -107,4 +116,23 @@ io_idtr_write:
 io_int_user:
 ; void
 	int 0x80
+	ret
+
+io_gdtr_read:
+; gdtr*
+	mov eax, GDTR0
+	ret
+
+io_gdtr_write:
+; void
+; gdtr*
+	mov eax, [esp + 4]
+	lgdt [eax]
+	ret
+
+io_load_tss:
+; void
+	xor ax, ax
+	mov ax, SELECTOR_TSS
+	ltr ax
 	ret
