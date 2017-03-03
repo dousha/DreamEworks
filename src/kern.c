@@ -12,7 +12,6 @@ static char *buf;
 
 void delay_test(){
 	puts("fuck yeah!\n");
-	return NULL;
 }
 
 /// @brief The grand entrance of kernel

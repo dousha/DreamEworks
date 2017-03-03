@@ -47,7 +47,7 @@ extern size_t task_init(size_t);
 extern void task_finalize();
 extern pid_t task_create(void*);
 extern void task_finalize();
-extern pid_t delay_create(uint32_t, void *(callback)());
+extern pid_t delay_create(uint32_t, void (*callback)());
 extern void delay_cancel(pid_t);
 extern void delay_poll();
 
