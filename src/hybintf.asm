@@ -12,6 +12,7 @@ global io_idtr_read, io_idtr_write
 global io_int_user
 global io_gdtr_read, io_gdtr_write
 global io_load_tss
+global exp_ud, int_dbg
 
 [section .text]
 io_in8:
@@ -135,4 +136,14 @@ io_load_tss:
 	xor ax, ax
 	mov ax, SELECTOR_TSS
 	ltr ax
+	ret
+
+exp_ud:
+; void, exception
+	ud2
+	ret
+
+int_dbg:
+; void
+	int 0x80
 	ret

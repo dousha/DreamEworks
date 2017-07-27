@@ -2,18 +2,21 @@
 #include "memory.h"
 #include "utils.h"
 #include "screen.h"
+#include "interrupts.h"
+#include "hybintf.h"
 
-static mem_manager* mm = 0;
+static mem_manager* mm;
 
 void mem_init(size_t size){
 	// size is the highmem size
 	// mm is always placed at 0x100000
-	// memory manager would take 5% of highmem for itself and memory table
-	size_t tableLen = size / 20;
+	// memory manager would take 0.5% of highmem for itself and memory table
+	size_t tableLen = size / 200;
 	size_t tableSize = (tableLen - sizeof(mem_manager)) / sizeof(mem_table);
 	// populate the memory
 	mm = (mem_manager*) 0x100000;
 	mm->memory_size = size;
+	mm->base_addr = 0x100000 + tableLen;
 	mm->free_memory_size = size - tableLen;
 	mm->records = tableSize;
 	mm->records_free = tableSize;
@@ -39,7 +42,7 @@ void* malloc(size_t size){
 					// seek for the next record
 					if(mm->tables[j].offset != 0) break;
 				}
-				if(j == mm->records){
+				if(j == mm->records - 1){
 					// hit the bottom of the list
 					// just alloc it
 					mm->tables[i+1].offset = 
@@ -89,8 +92,8 @@ void* malloc(size_t size){
 						}
 						else{
 							// move tables
-							memmove_b(mm->tables + i + 2, 
-									mm->tables + i + 3,
+							memmove_b((uint8_t*) mm->tables + i + 2, 
+									(uint8_t*) mm->tables + i + 3,
 									mm->records - mm->records_free - i - 2);
 							// alloc the space
 							mm->tables[i+1].offset = 
@@ -108,11 +111,18 @@ void* malloc(size_t size){
 						+ mm->tables[i].size;
 					mm->tables[i+1].size = size;
 					lastOffset = mm->tables[i+1].offset;
+					break;
 				}
 			}
 			else{
 				continue;
 			}
+		}else{
+			// this is the very first table
+			mm->tables[i].offset = mm->base_addr;
+			mm->tables[i].size = size;
+			lastOffset = mm->base_addr;
+			break;
 		}
 	}
 	mm->free_memory_size -= size;
@@ -140,11 +150,19 @@ void free(void* ptr){
 	// we've done that for you
 }
 
+size_t get_base(){
+	return mm->base_addr;
+}
+
+size_t get_total_records(){
+	return mm->records;
+}
+
 void dbg_print_mm(){
 	// print memory status
 	clrscr();
 	set_pos(0, 0);
-	char* buf = malloc(sizeof(char) * 32); // lol
+	char* buf = (char*) malloc(sizeof(char) * 32); // lol
 	
 	puts("HighMem: ");
 	itoa(buf, mm->memory_size - mm->free_memory_size, 10);

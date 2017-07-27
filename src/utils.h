@@ -6,6 +6,8 @@
 #define OCT 8
 #define BIN 2
 
+#define MEM_ASSERT(x) if(x == NULL){for(;;);}
+
 extern void itoa(char*, long, int);
 /// please note
 /// dump registers can only be used when

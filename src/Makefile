@@ -29,7 +29,7 @@ run: $(TARGET)
 	qemu-system-i386 -fda hd.img -monitor stdio;
 
 dbg: $(TARGET)
-	bochs -q 'boot:a' 'floppya: 1_44=./$(TARGET), status=inserted'
+	bochs -q -f .bochsrc
 
 all: $(TOTAL_TARGET) $(C_DEP) $(EX_DEP)
 	cp bl.bin hosttools/mbr.bin

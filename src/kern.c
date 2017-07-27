@@ -25,7 +25,11 @@ void c_kern(){
 	// try to alloc buf
 	buf = (char*) malloc(20 * sizeof(char));
 	itoa(buf, size, 10);
-	puts("[Kern] There's "); puts(buf); puts(" bytes avaliable on HihgMem\n");
+	puts("[Kern] Free mem = "); puts(buf); puts("\n");
+	itoa(buf, get_base(), 16);
+	puts("[Kern] Base addr = "); puts(buf); puts("\n");
+	itoa(buf, get_total_records(), 10);
+	puts("[Kern] Record count = "); puts(buf); puts("\n");
 	// init idt
 	init_idt((void*) io_idtr_read());
 	// init 8259a chips

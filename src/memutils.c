@@ -43,10 +43,6 @@ void memmove_b(uint8_t* from, uint8_t* to, size_t n){
 /// @brief Probe system memory
 /// Especially for HighMem (> 1MB)
 /// @return Avaliable size starting from 0x100000
-/// @warning This function containes a magic variable which seems
-/// unused, but it affects the probing result. Might be an optmizing
-/// glitch or so.
-/// DO NOT REMOVE IT! Or probing will fail.
 uint64_t mem_probe(){
 	// the probing process is actually done by bootloader
 	// memory information were stored in 0x7e00
@@ -54,32 +50,19 @@ uint64_t mem_probe(){
 	entryCount -= 0x7e00;
 	entryCount /= 20;
 	entryCount++;
-	//char buf[20];
 	mem_record* curMemRec = (mem_record*) 0x7e00;
-	uint64_t base = 0; ///< MAGIC! DO NOT TOUCH!
 	uint64_t size = 0;
 	puts("[Memutil] Probing memory...\n");
-	//itoa(buf, entryCount, 10);
-	//puts("Entry count: "); puts(buf); putchar('\n');
 	while(entryCount > 0){
-		//itoa(buf, curMemRec->base, HEX);
-		//puts(buf); putchar('\t');
-		//itoa(buf, curMemRec->size, HEX);
-		//puts(buf); putchar('\t');
 		switch(curMemRec->type){
 			case 1:
-				//puts("Free\n");
-				base = curMemRec->base;
 				size = curMemRec->size;
 				break;
 			default:
-				//puts("Used\n");
 				break;
 		}
 		++curMemRec;
 		--entryCount;
 	}
-	/// MAGIC! DO NOT TOUCH!
-	// size -= base;
 	return size;
 }

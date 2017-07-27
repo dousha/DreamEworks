@@ -46,7 +46,7 @@ void int_task_tick_hwnd(){
 }
 
 void int_user_0x80_hwnd(){
-	putchar('8');
+	putchar('d');
 }
 
 void int_exception_hwnd(int vec, int err, int eip, int cs, int eflags){

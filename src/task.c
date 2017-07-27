@@ -9,7 +9,6 @@
 
 static task_manager* tm = 0;
 static tss* t0 = NULL;
-static char* buf = NULL;
 static uint32_t freezer = 0;
 
 task_manager* task_man_get(){
@@ -18,8 +17,6 @@ task_manager* task_man_get(){
 }
 
 size_t task_init(size_t size){
-	// [DBG]
-	buf = (char*) malloc(sizeof(char) * 32);
 	// task manager would take 2% of highmem
 	t0 = (tss*) malloc(sizeof(tss));
 	memfill_b((uint8_t*) t0, sizeof(tss), 0);
@@ -76,7 +73,6 @@ void task_finalize(){
 	free(tm->task_list);
 	free(tm);
 	free(t0);
-	free(buf);
 }
 
 pid_t delay_create(uint32_t d, void (*callback)()){
