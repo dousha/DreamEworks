@@ -14,7 +14,7 @@ struct shell{
 shell;
 
 extern void shell_init();
-extern void shell_keyin(uint8_t, char);
+extern void shell_keyin(uint8_t, uint8_t);
 extern void shell_loop();
 extern void shell_submit();
 extern void shell_update();

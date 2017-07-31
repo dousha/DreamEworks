@@ -2,7 +2,7 @@ ENTRY(entry)
 OUTPUT_FORMAT(binary)
 SECTIONS
 {
-	. = 0xd200;
+	. = 0x8000;
 
 	.text :
 	{
@@ -19,17 +19,17 @@ SECTIONS
 		*(.idt)
 	}
 
-	.rodata : 
+	.rodata :
 	{
 		*(.rodata)
 	}
 
-	.data : 
+	.data :
 	{
 		*(.data)
 	}
 
-	.bss : 
+	.bss :
 	{
 		*(COMMON)
 		*(.bss)

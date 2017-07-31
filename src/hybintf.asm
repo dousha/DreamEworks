@@ -3,6 +3,7 @@
 extern IDTR0
 extern GDTR0
 extern SELECTOR_TSS
+extern SELECTOR_USER_TSS
 
 global io_hlt, io_cli, io_sti, io_stihlt
 global io_out8, io_out16, io_out32
@@ -11,7 +12,7 @@ global io_eflags_read, io_eflags_write
 global io_idtr_read, io_idtr_write
 global io_int_user
 global io_gdtr_read, io_gdtr_write
-global io_load_tss
+global io_load_tss, io_load_user_tss
 global exp_ud, int_dbg
 
 [section .text]
@@ -138,12 +139,32 @@ io_load_tss:
 	ltr ax
 	ret
 
+io_load_user_tss:
+; void
+	xor ax, ax
+	mov ax, SELECTOR_USER_TSS
+	ltr ax
+	ret
+
+far_jump:
+; int eip
+; int cs
+	jmp FAR [esp + 4]
+	ret
+
+far_call:
+; int eip
+; int cs
+	call FAR [esp + 4]
+	retf
+
 exp_ud:
 ; void, exception
 	ud2
 	ret
 
 int_dbg:
-; void
+; void, interrupt
+	xor eax, eax
 	int 0x80
 	ret

@@ -26,11 +26,11 @@ Generals
 \____________________/
 
 Record Structure
-0              15     23   31         35        39 (Byte)
+0               7     15   23         27        31 (Byte)
 +---------------+------+----+----------+---------+
 |name           |offset|size|attributes|timestamp|
 +---------------+------+----+----------+---------+
-|<---- 016 ---->|<-08->|<08>|<-- 04 -->|<-- 4 -->| (Byte)
+|<---- 08 ----->|<-08->|<08>|<-- 04 -->|<-- 4 -->| (Byte)
 
 Attributes Structure
 0          7    11   14       15
@@ -98,7 +98,8 @@ applications from operating the disk.
 
 When updating an existing record, if the file size is increased and may overlap
 with the next data entry, search forward to find a fit space (defined below) 
-then move the data to corresponding place.
+then move the data to corresponding place. This operation may result a terrible
+performance.
 
 The `fit space >= new space * 1.1`.
 

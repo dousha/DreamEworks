@@ -9,6 +9,7 @@
 
 static task_manager* tm = 0;
 static tss* t0 = NULL;
+static tss* user_tss = NULL;
 static uint32_t freezer = 0;
 
 task_manager* task_man_get(){
@@ -19,21 +20,29 @@ task_manager* task_man_get(){
 size_t task_init(size_t size){
 	// task manager would take 2% of highmem
 	t0 = (tss*) malloc(sizeof(tss));
+	user_tss = (tss*) malloc(sizeof(tss));
 	memfill_b((uint8_t*) t0, sizeof(tss), 0);
+	memfill_b((uint8_t*) user_tss, sizeof(tss), 0);
 	t0->esp0 = 0;
 	t0->ss0 = 0x20;
-	t0->iopb = 107;
+	t0->iopb = 104;
+	user_tss->esp0 = 0;
+	user_tss->ss0 = 0x20;
+	user_tss->iopb = 104;
 	gdtr* gr0 = (gdtr*) io_gdtr_read();
 	gdt* g0 = (gdt*) gr0->offset;
 	encode((g0 + 5), (uint32_t) t0, sizeof(tss), 0x89, 0x40);
+	encode((g0 + 6), (uint32_t) user_tss, sizeof(tss), 0x89, 0x40);
 	io_load_tss();
 	
-	size_t tableLen = (size - sizeof(task_manager) - sizeof(tss)) / 50;
+	size_t tableLen = (size - sizeof(task_manager) - sizeof(tss)) / 100;
 	tm = (task_manager*) malloc(sizeof(task_manager));
 	tm->task_count = 0;
 	tm->task_list = (task*) malloc(tableLen / 2);
+	tm->task_len = tableLen / 2 / sizeof(task);
 	tm->delay_list = (delay*) malloc(tableLen / 2);
 	tm->delay_count = 0;
+	tm->delay_len = tableLen / 2 / sizeof(delay);
 	tm->current_pid = 0;
 	tm->tick = 100;
 	tm->uptime = 0;
@@ -48,13 +57,15 @@ void task_switch(pid_t id){
 
 }
 
-pid_t task_create(void* prgm){
+pid_t task_create(void* code, void* stack){
 	// create a task where it's text starts at prgm
 	// the program and it's layout shall be loaded into memory
 	// by elf_loader
 
-	// the local descriptor is used here
-	// TODO:impl
+	task* t = (task*) malloc(sizeof(task));
+	t->tick = 100;
+	t->status = TASK_SUSPEND;
+	t->tss = (tss*) malloc(sizeof(tss));
 	return (pid_t) 0;
 }
 

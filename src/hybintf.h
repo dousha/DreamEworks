@@ -17,8 +17,8 @@ extern uint32_t io_in32(uint16_t);
 /// it would break if I explicitly use
 /// uintx_t
 /// trust me
-/// maybe because of compiler optimization
-/// that made everything aligned to 4bytes
+/// maybe it's because of compiler optimizations
+/// which made everything aligned to 4bytes
 /// so the stack goes wried?
 extern void io_out8(int, int);
 extern void io_out16(int, int);
@@ -31,8 +31,11 @@ extern void io_idtr_write(uint32_t);
 extern uint32_t io_gdtr_read(void);
 extern void io_gdtr_write(uint32_t);
 extern void io_load_tss(void);
+extern void io_load_user_tss(void);
 
 extern void io_int_user(void);
+
+extern void far_jump(int, int);
 
 extern void exp_ud(void);
 extern void int_dbg(void);

@@ -1,7 +1,8 @@
 Next at t=0
 (0) [0x0000fffffff0] f000:fff0 (unk. ctxt): jmpf 0xf000:e05b          ; ea5be000f0
+b 0x8000
 c
-Next at t=394625419
-(0) [0x00000000d789] 0008:000000000000d789 (unk. ctxt): jz .+6 (0x0000d791)       ; 7406
-quit
-(0).[394625419] [0x00000000d789] 0008:000000000000d789 (unk. ctxt): jz .+6 (0x0000d791)       ; 7406
+Next at t=373077161
+(0) [0x000000000003] 0000:0003 (unk. ctxt): lock push bx              ; f053
+q
+(0).[373077161] [0x000000000003] 0000:0003 (unk. ctxt): lock push bx              ; f053

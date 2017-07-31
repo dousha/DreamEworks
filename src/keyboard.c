@@ -5,10 +5,10 @@
 #include "screen.h"
 
 static keyboard* kbd;
-static void (*kbdProcessBind)(uint8_t, char);
+static void (*kbdProcessBind)(uint8_t, uint8_t);
 
 void kbd_init(){
-	kbd = malloc(sizeof(keyboard));
+	kbd = (keyboard*) malloc(sizeof(keyboard));
 	kbd->readptr = 0;
 	kbd->writeptr = 0;
 	kbdProcessBind = NULL;
@@ -27,7 +27,7 @@ int kbd_status(){
 	return kbd->readptr == kbd->writeptr;
 }
 
-void kbd_bind(void (*callback)(uint8_t, char)){
+void kbd_bind(void (*callback)(uint8_t, uint8_t)){
 	kbdProcessBind = callback;
 }
 
@@ -51,7 +51,8 @@ void kbd_process(){
 			case KEY_CTRL:
 				kbd->key_state ^= STATE_CTRL;
 				break;
-			case KEY_SHIFT:
+			case KEY_LEFT_SHIFT:
+			case KEY_RIGHT_SHIFT:
 				kbd->key_state ^= STATE_SHIFT;
 				break;
 			case KEY_ALT:
@@ -65,14 +66,15 @@ void kbd_process(){
 			case KEY_CTRL:
 				kbd->key_state |= STATE_CTRL;
 				break;
-			case KEY_SHIFT:
+			case KEY_LEFT_SHIFT:
+			case KEY_RIGHT_SHIFT:
 				kbd->key_state |= STATE_SHIFT;
 				break;
 			case KEY_ALT:
 				kbd->key_state |= STATE_ALT;
 				break;
 			default:
-				kbdProcessBind(kbd->key_state, charmap[kbd->buf[kbd->readptr]]);
+				kbdProcessBind(kbd->key_state, kbd->buf[kbd->readptr]);
 				break;
 		}
 	}

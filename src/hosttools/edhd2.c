@@ -58,13 +58,13 @@ int print_attribute(uint16_t attr){
 	if(attr & 0x0400) printf("l"); // ---- -l-- ---- ----, link
 	if(attr & 0x0200) printf("f"); // ---- --f- ---- ----, folder
 	
-	if(attr & 0x0100) printf("r"); // ---- ---r ---- ----, ring0 read
+	if(attr & 0x0100) printf("r"); // ---- ---r ---- ----, owner read
 	if(attr & 0x0080) printf("w");
 	if(attr & 0x0040) printf("x");
-	if(attr & 0x0020) printf("r"); // ---- ---- --r- ----, ring1 read
+	if(attr & 0x0020) printf("r"); // ---- ---- --r- ----, group read
 	if(attr & 0x0010) printf("w");
 	if(attr & 0x0008) printf("x");
-	if(attr & 0x0004) printf("r"); // ---- ---- ---- -r--, ring3 read
+	if(attr & 0x0004) printf("r"); // ---- ---- ---- -r--, other read
 	if(attr & 0x0002) printf("w");
 	if(attr & 0x0001) printf("x");
 	return 1;

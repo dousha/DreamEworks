@@ -6,14 +6,12 @@
 [bits 16]
 [org 0x7c00]
 
-TOTAL_CYLINDERS equ 10 ; how many cylinders do we want to read?
+TOTAL_SECTORS equ 360 ; how many cylinders do we want to read?
 ; 1 cylinder = 2 x 18 sectors = 2 x 18 x 512 bytes = 18432 bytes
 
 _stage1:
 mov sp, 0x7c00 ; stack rasies upwards, 0x500 ~ 0x7bff are free
 xor ax, ax
-mov si, loading_msg
-call printstr ; say hello
 call mem_probe ; get memory info
 jmp load_stage2 ; load stage 2
 
@@ -40,51 +38,126 @@ printstr: ; si -> str_start
 printstr_break:
 	ret
 
+fstrcmp: ; si -> src, di -> dest
+	push ax
+	push si
+	push di
+	xor ax, ax
+.cnt:
+	mov al, [si]
+	cmp al, 0
+	je .done
+	cmp al, [di]
+	jne .noteq
+	add si, 1
+	add di, 1
+	jmp .cnt
+.done:
+	stc
+	pop di
+	pop si
+	pop ax
+	ret
+.noteq:
+	clc
+	pop di
+	pop si
+	pop ax
+	ret
+
+read_disk:
+	; es:bx -> dest
+	; ax -> sector (0 - 2880)
+	push ax
+	push cx
+	push dx
+	push si
+	xor si, si
+	xor dx, dx
+	mov cl, 18
+	div cl
+	mov cl, ah
+	add cl, 1
+	mov dl, al
+	mov ax, dx ; this flushes ah
+	xor dx, dx
+	mov dl, 2
+	div dl
+	mov ch, al
+	xor dx, dx
+	mov dh, ah
+	mov dl, 0
+.retry:
+	mov ah, 2
+	mov al, 1
+	add si, 1
+	cmp si, 5
+	jge bad_boot
+	int 0x13
+	jc .retry
+	call printdot
+	pop si
+	pop dx
+	pop cx
+	pop ax
+	ret
+
 load_stage2:
-	; the following code shall load
-	; the first 10 cylinders of the floppy 
-	; in to 0x8000
-	mov ax, 0x0820 ; since we skipped the first sector (0x20)
+	; the following code shall load kernel into 0x8000
+	; load table
+	xor ax, ax
 	mov es, ax
-	mov ch, 0 ; cylinder 0
-	mov dh, 0 ; head 0
-	mov cl, 2 ; sector 2
-	rl:
-		mov si, 0
-	retry:
-		mov ah, 0x02
-		mov al, 1
-		xor bx, bx
-		mov dl, 0
-		int 0x13
-		jnc next
-		add si, 1
-		cmp si, 5
-		jae bad_boot
-		xor ax, ax
-		mov dl, 0
-		jmp retry
-	next:
-		call printdot
-		mov ax, es
-		add ax, 0x0020
-		mov es, ax
-		add cl, 1
-		cmp cl, 18
-		jbe rl
-		mov cl, 1
-		add dh, 1
-		cmp dh, 2
-		jb rl
-		mov dh, 0
-		add ch, 1
-		cmp ch, TOTAL_CYLINDERS
-		jb rl
-	jmp 0xd200 ; then jump to the stage2 code
-	; 0xd200 = 0x5200 + 0x8000
-	; `edhd` would put file content into 0x5200
-	; please refer to the fs.note.md in notes/ for
-	; file system details
+	mov bx, 0x8000
+	mov ax, 1
+	call read_disk
+	mov si, table_string
+	mov di, bx
+	call fstrcmp
+	jnc bad_boot
+	; 16 records per sector
+	mov si, kern_string
+	xor cx, cx
+.cnt:
+	add cx, 1
+	cmp cx, 16
+	jg .next_sector
+	add di, 32
+	call fstrcmp
+	jc .found
+	jmp .cnt
+.next_sector:
+	add ax, 1
+	call read_disk ; bx = 0x8000, this would cover them up
+	mov di, bx
+	cmp BYTE [di], 0
+	je bad_boot ; kernel not found
+	jmp .cnt
+.found:
+	add di, 8
+	mov DWORD eax, [di]
+	add di, 4
+	mov DWORD edx, [di]
+	xor ecx, ecx
+	mov ecx, 512
+	div ecx
+	cmp edx, 0
+	jne hang ; ...FIXME
+	mov dx, 0x800
+	mov es, dx
+	xor bx, bx
+	add ax, 0x10; edhd bug??
+	mov cx, ax
+	add cx, TOTAL_SECTORS
+.continue:
+	add ax, 1
+	cmp ax, cx
+	jg .read_done
+	call read_disk
+	add dx, 0x20
+	mov es, dx
+	jmp .continue
+.read_done:
+	jmp 0x8000 ; kernel loaded in this addr
 
 mem_probe:
 	xor ebx, ebx
@@ -120,14 +193,20 @@ bad_boot:
 	call printstr
 	jmp hang
 
-loading_msg: 
-	db "dsys v0.0.1"
-	db 0x0a, 13, 0
+table_string:
+	db "#REC_TBL"
+	db 0
+kern_string:
+	db "kern    "
+	db 0
 die_msg:
 	db "FAILED READING DISK"
 	db 0x0a, 13, 0
 no_mem_probe_msg:
 	db "CANNOT PROBE MEMORY"
+	db 0x0a, 13, 0
+load_done_msg:
+	db "done"
 	db 0x0a, 13, 0
 
 _stage1_end:

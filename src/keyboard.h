@@ -15,7 +15,8 @@
 
 #define KEY_ESC 0x01
 #define KEY_CTRL 0x1d
-#define KEY_SHIFT 0x2a
+#define KEY_LEFT_SHIFT 0x2a
+#define KEY_RIGHT_SHIFT 0x36
 #define KEY_ALT 0x38
 #define KEY_LOTUS 0x5b
 #define KEY_CONTEXT 0x5c
@@ -41,7 +42,7 @@ keyboard;
 
 extern void kbd_init();
 extern void kbd_finalize();
-extern void kbd_bind(void (*callback)(uint8_t, char));
+extern void kbd_bind(void (*callback)(uint8_t, uint8_t));
 extern void kbd_push(uint8_t);
 extern int kbd_status();
 extern void kbd_process();
@@ -92,7 +93,7 @@ KEY_CTRL, KEY_CTRL, KEY_CTRL | KEY_RIGHT,
 ';', ':', 0,
 '\'', '\"', 0,
 '`', '~', 0,
-KEY_SHIFT, KEY_SHIFT, KEY_SHIFT | KEY_RIGHT,
+KEY_LEFT_SHIFT, KEY_LEFT_SHIFT, KEY_LEFT_SHIFT,
 '\\', '|', 0,
 'z', 'Z', 0,
 'x', 'X', 0,
@@ -104,7 +105,7 @@ KEY_SHIFT, KEY_SHIFT, KEY_SHIFT | KEY_RIGHT,
 ',', '<', 0,
 '.', '>', 0,
 '/', '?', 0,
-KEY_SHIFT | KEY_RIGHT , KEY_SHIFT | KEY_RIGHT, KEY_SHIFT | KEY_RIGHT,
+KEY_RIGHT_SHIFT , KEY_RIGHT_SHIFT, KEY_RIGHT_SHIFT,
 '*','*',0, // *
 KEY_ALT, KEY_ALT, KEY_ALT | KEY_RIGHT,
 ' ', ' ', 0, // space

@@ -5,9 +5,18 @@
 #include "screen.h"
 #include "shell.h"
 
+static char* buf;
+static char* line;
+
 void shell_init(){
-	//clrscr();
+	clrscr();
 	set_cursor(0, 0);
+	buf = (char*) malloc(sizeof(char) * 8);
+	line = (char*) malloc(sizeof(char) * 82);
+}
+
+void shell_finalize(){
+	free(buf);
 }
 
 void shell_loop(){
@@ -15,15 +24,18 @@ void shell_loop(){
 		io_cli();
 		if(kbd_status()){
 			io_stihlt();
-		}
-		else{
+		}else{
 			kbd_process();
 		}
 	}
 }
 
-void shell_keyin(uint8_t mod, char c){
-	if(!(mod & STATE_SHIFT))
-		putchar(c);
+void shell_keyin(uint8_t mode, uint8_t code){
+	if(mode & STATE_SHIFT){
+		putchar(charmap[code * 3 + 1]);
+	}else{
+		putchar(charmap[code * 3]);
+	}
+	cursor_follow();
 }
 

@@ -1,6 +1,6 @@
 /**
  * edhd.c
- * 
+ *
  * QDFS disk image editing tool
  */
 
@@ -23,12 +23,12 @@ char input_buffer[512];
 char *fsTableStr;
 
 typedef struct record{
-	char name[16]; //16
+	char name[8]; //8
 	uint64_t offset; // +8
 	uint64_t size; // +8
 	uint32_t attribute; // +4
 	uint32_t timestamp; // +4
-} record; // 40 bytes
+} record; // 32 bytes
 
 record *fs_table, *tmp_table;
 
@@ -39,7 +39,7 @@ void cp_worker(FILE*, const char*);
 void filename_padding(char* name){
 	// file name has ONLY 16 bytes
 	int i = 0;
-	for(i = 0; i < 16; i++){
+	for(i = 0; i < 8; i++){
 		if(name[i] < 32 || name[i] > 126){
 			name[i] = ' ';
 		}
@@ -47,8 +47,8 @@ void filename_padding(char* name){
 }
 
 void init(){
-	fs_table = malloc(sizeof(record));
-	tmp_table = malloc(sizeof(record));
+	fs_table = (record*) malloc(sizeof(record));
+	tmp_table = (record*) malloc(sizeof(record));
 	if(fs_table == NULL || tmp_table == NULL){
 		printf("Unable to allocate memory!\n");
 		finalize();
@@ -62,7 +62,7 @@ void init(){
 	if(img == NULL){
 		printf("hd.img not found. Creating a new one.\n");
 		img = fopen("hd.img", "w+b");
-		fsTableStr = malloc(sizeof(char) * 16);
+		fsTableStr = (char*) malloc(sizeof(char) * 8);
 		strcpy(fsTableStr, "#REC_TBL");
 		filename_padding(fsTableStr);
 		int i = 0;
@@ -72,7 +72,7 @@ void init(){
 		}
 		printf("%d bytes written.\n", i);
 		// create the fs table
-		strncpy(fs_table->name, fsTableStr, 16);
+		strncpy(fs_table->name, fsTableStr, 8);
 		fs_table->offset = 0;
 		fs_table->size = sizeof(record) * 256;
 		fs_table->attribute = 0xDB;
@@ -112,12 +112,12 @@ void ls(){
 	// just read it along the track
 	uint64_t ptr = 0;
 	size_t counter = 0;
-	printf("attr\t|name            |offset\t|size\t\t|time\n");
+	printf("attr\t|name    |offset\t|size\t\t|time\n");
 	for(ptr = 0; ptr < fs_table->size; ptr+=sizeof(record)){
 		fseek(img, 512 + ptr, SEEK_SET);
 		fread(tmp_table, sizeof(record), 1, img);
-		if(strnlen(tmp_table->name, 16) < 1) continue;
-		printf("%u\t|%16.16s|%u\t\t|%u\t\t|%u\n",
+		if(strnlen(tmp_table->name, 8) < 1) continue;
+		printf("%u\t|%8.8s|%u\t\t|%u\t\t|%u\n",
 			tmp_table->attribute,
 			tmp_table->name,
 			tmp_table->offset,
@@ -125,7 +125,7 @@ void ls(){
 			tmp_table->timestamp);
 		++counter;
 	}
-	printf("%u/%u records are used.\n", 
+	printf("%u/%u records are used.\n",
 			counter,
 			fs_table->size / sizeof(record));
 }
@@ -135,28 +135,29 @@ uint64_t get_empty_record(record* r){
 	for(i = 0; i < fs_table->size; i+=sizeof(record)){
 		fseek(img, 512 + i, SEEK_SET);
 		fread(r, sizeof(record), 1, img);
-		if(strnlen(r->name, 16) < 1){
+		if(strnlen(r->name, 8) < 1){
 			// this is it!
 			return (512 + i);
 		}
 	}
+	return 0;
 }
 
 int test_conflict(const char* name){
-	record *r = malloc(sizeof(record));
-	char *varName = malloc(sizeof(char) * 16);
+	record *r = (record*) malloc(sizeof(record));
+	char *varName = (char*) malloc(sizeof(char) * 16);
 	if(r == NULL){
 		printf("Cannot allocate memory!");
 		finalize();
 		exit(-1);
 	}
-	strncpy(varName, name, 16);
+	strncpy(varName, name, 8);
 	filename_padding(varName);
 	size_t i = 0;
 	for(i = 0; i < fs_table->size; i+=sizeof(record)){
 		fseek(img, 512 + i, SEEK_SET);
 		fread(r, sizeof(record), 1, img);
-		if(strnlen(r->name, 16) < 1) continue;
+		if(strnlen(r->name, 8) < 1) continue;
 		if(strcmp(r->name, varName) == 0){
 			free(r);
 			free(varName);
@@ -183,18 +184,18 @@ uint64_t get_fit_offset(uint64_t size){
 		// outer loop
 		fseek(img, 512 + i, SEEK_SET);
 		fread(r, sizeof(record), 1, img);
-		if(strnlen(r->name, 16) < 1) continue;
+		if(strnlen(r->name, 8) < 1) continue;
 		lastFileEnd = r->offset + r->size;
 		flagHasNextFile = 0;
-		for(j = i + sizeof(record); 
-			j < fs_table->size; 
+		for(j = i + sizeof(record);
+			j < fs_table->size;
 			j+=sizeof(record)){
 			// inner loop
 			fseek(img, 512 + j, SEEK_SET);
 			// get next vaild record
 			// once get it, just use it
 			fread(rNext, sizeof(record), 1, img);
-			if(strnlen(rNext->name, 16) < 1) continue;
+			if(strnlen(rNext->name, 8) < 1) continue;
 			nextFileStart = rNext->offset;
 			flagHasNextFile = 1;
 			break;
@@ -225,10 +226,10 @@ void cp_worker(FILE* file, const char* name){
 	FILE* hfp = file;
 	printf("Copying file...\n");
 	uint64_t recordAddr = get_empty_record(tmp_table);
-	fsTableStr = malloc(sizeof(char) * 16);
-	strncpy(fsTableStr, name, 16);
+	fsTableStr = (char*) malloc(sizeof(char) * 8);
+	strncpy(fsTableStr, name, 8);
 	filename_padding(fsTableStr);
-	strncpy(tmp_table->name, fsTableStr, 16);
+	strncpy(tmp_table->name, fsTableStr, 8);
 	fseek(hfp, 0, SEEK_END);
 	tmp_table->offset = get_fit_offset((uint32_t) ftell(hfp));
 	tmp_table->size = (uint32_t) ftell(hfp);
@@ -312,7 +313,7 @@ void cp(){
 	scanf("%s", src);
 	printf("Dest: ");
 	scanf("%s", dest);
-	
+
 	free(src);
 	free(dest);
 }
@@ -324,13 +325,13 @@ void mkdir(){
 void rm_worker(const char* name){
 	int foundFlag = 0;
 	char* fileName = malloc(sizeof(char) * 16);
-	strncpy(fileName, name, 16);
+	strncpy(fileName, name, 8);
 	filename_padding(fileName);
 	uint64_t ptr = 0;
 	for(ptr = 0; ptr < fs_table->size; ptr+=sizeof(record)){
 		fseek(img, 512 + ptr, SEEK_SET);
 		fread(tmp_table, sizeof(record), 1, img);
-		if(strncmp(fileName, tmp_table->name, 16) == 0){
+		if(strncmp(fileName, tmp_table->name, 8) == 0){
 			// this is it
 			size_t i = 0;
 			for(i = 0; i < sizeof(record); i++){
@@ -364,7 +365,7 @@ void updateMBR(){
 	rewind(img);
 	rewind(mbr);
 	fread(mbr_buffer, 512, 1, mbr);
-	printf("Written %u bytes.", 
+	printf("Written %u bytes.",
 			fwrite(mbr_buffer, 512, 1, img));
 }
 
@@ -394,4 +395,3 @@ int main(int argc, char** argv){
 	finalize();
 	return 0;
 }
-

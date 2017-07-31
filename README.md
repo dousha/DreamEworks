@@ -1,11 +1,5 @@
-dsys - A Simple OS for Hobbyists
+DreamEworks - A Simple OS for Hobbyists
 =========================================
-
-dsys is just a randomly chose name. It DOES NOT has any pratical meaning.
-Maybe "Dirty SYStems"?
-
-It's built for x86, but for some wried reason I haven't probed yet, Bochs 
-doesn't do the thing.
 
 # Requirements
 
@@ -27,7 +21,7 @@ Really optional packages if you want to run it on a real machine.
 * 3.5-inch floppy (1440K)
 * 3.5-inch floppy drive (NOT USB floppy drive)
 * Determination that you would like to run an experimental stuff that
-can blow up your house any time
+can blow up your house
 * Braveness that dare to push a charging Samsung Note 7 against your eyeballs
 
 # Build

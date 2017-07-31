@@ -1,2 +1,9 @@
 /z_tools
 /lab
+/src-std
+/src/hosttools/*.o
+/src/hosttools/*.pkg
+/src/hosttools/edhd
+*.o
+*.pkg
+*.sym

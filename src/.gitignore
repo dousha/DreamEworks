@@ -3,7 +3,7 @@
 *.bin
 *.pkg
 *.exu
-hosttools/*.img
-hosttools/*.pkg
-hosttools/*.o
-hosttools/edhd
+/hosttools/*.img
+/hosttools/*.pkg
+/hosttools/*.o
+/hosttools/edhd

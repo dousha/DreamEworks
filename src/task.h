@@ -18,7 +18,6 @@ struct task{
 	pid_t id;
 	uint8_t tick;
 	uint8_t status;
-	void* code_chunk;
 	tss* tss;
 } __attribute__((packed))
 task;
@@ -36,7 +35,9 @@ struct task_manager{
 	delay* delay_list;
 	pid_t current_pid;
 	uint32_t task_count;
+	uint32_t task_len;
 	uint32_t delay_count;
+	uint32_t delay_len;
 	uint8_t tick;
 	uint32_t uptime;
 } __attribute__((packed))
@@ -45,8 +46,12 @@ task_manager;
 extern task_manager* task_man_get();
 extern size_t task_init(size_t);
 extern void task_finalize();
-extern pid_t task_create(void*);
-extern void task_finalize();
+extern pid_t task_create(void*, void*);
+extern void task_switch(pid_t);
+extern void task_sleep(pid_t);
+extern void task_wake(pid_t);
+extern void task_kill(pid_t);
+
 extern pid_t delay_create(uint32_t, void (*callback)());
 extern void delay_cancel(pid_t);
 extern void delay_poll();

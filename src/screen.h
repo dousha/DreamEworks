@@ -5,11 +5,13 @@
 
 #include "vga.h"
 
-extern void clrscr();
+extern void clrscr(void);
 extern uint32_t calc_offset();
 extern uint16_t make_vga_entry(uint8_t, uint8_t);
 extern void set_pos(uint16_t, uint16_t);
 extern void set_color(enum VGA_COLOR, enum VGA_COLOR);
+extern void set_cursor(uint8_t, uint8_t);
+extern void cursor_follow(void);
 extern void putchar(uint8_t);
 extern void puts(const char*);
 extern void term_init();

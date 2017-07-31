@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include "vga.h"
 #include "memutils.h"
+#include "hybintf.h"
 
 uint16_t* vram;
 uint8_t curColor;
@@ -34,6 +35,18 @@ void set_pos(uint16_t newx, uint16_t newy){
 
 void set_color(enum VGA_COLOR fg, enum VGA_COLOR bg){
 	curColor = make_color(fg, bg);
+}
+
+void set_cursor(uint8_t x, uint8_t y){
+	uint16_t pos = y * 80 + x;
+	io_out8(0x0f, 0x3d4);
+	io_out8((uint8_t) (pos & 0xff), 0x3d5);
+	io_out8(0x0e, 0x3d4);
+	io_out8((uint8_t) ((pos >> 8) & 0xff), 0x3d5);
+}
+
+void cursor_follow(){
+	set_cursor(curX, curY);
 }
 
 void roll_screen(){

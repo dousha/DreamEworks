@@ -3,9 +3,9 @@
 #include "interrupts.h"
 
 pool* pool_create(size_t n){
-	pool* p = malloc(sizeof(pool));
+	pool* p = (pool*) malloc(sizeof(pool));
 	if(p == NULL) int_user_0x80_hwnd();
-	p->pol = malloc(sizeof(uint8_t) * n);
+	p->pol = (uint8_t*) malloc(sizeof(uint8_t) * n);
 	p->len = n;
 	p->r = 0;
 	p->w = 0;

@@ -2,17 +2,21 @@
 #include "hybintf.h"
 #include "memutils.h"
 #include "utils.h"
+#include "gdt.h"
 #include "idt.h"
 #include "interrupts.h"
 #include "memory.h"
 #include "keyboard.h"
 #include "task.h"
+#include "shell.h"
 
 static char *buf;
 
+/*
 void delay_test(){
 	puts("fuck yeah!\n");
 }
+*/
 
 /// @brief The grand entrance of kernel
 /// Called by stage2.asm:jmp c_kern
@@ -42,21 +46,13 @@ void c_kern(){
 	itoa(buf, task_init(size), 10);
 	puts("[Kern] "); puts(buf); puts(" bytes used for taskmgr.\n");
 	// put a delay for test
-	delay_create(500, &delay_test);
+	//delay_create(500, &delay_test);
 	// then keyboard
 	kbd_init();
 	// and the shell
-	// but the shell hasn't be done yet
-	//kbd_bind(init_shell());
-	for(;;){
-		io_cli();
-		if(kbd_status()){
-			io_stihlt();
-		}
-		else{
-			kbd_process();
-		}
-	}
+	shell_init();
+	kbd_bind(&shell_keyin);
+	shell_loop();
 	kbd_finalize();
 	free(buf);
 }
