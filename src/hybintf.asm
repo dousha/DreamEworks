@@ -13,6 +13,8 @@ global io_idtr_read, io_idtr_write
 global io_int_user
 global io_gdtr_read, io_gdtr_write
 global io_load_tss, io_load_user_tss
+global io_current_esp
+global far_jump, far_call, test_jump
 global exp_ud, int_dbg
 
 [section .text]
@@ -134,16 +136,17 @@ io_gdtr_write:
 
 io_load_tss:
 ; void
-	xor ax, ax
-	mov ax, SELECTOR_TSS
-	ltr ax
+; int seg
+	ltr [esp + 4]
 	ret
 
-io_load_user_tss:
-; void
-	xor ax, ax
-	mov ax, SELECTOR_USER_TSS
-	ltr ax
+io_current_esp:
+; uint32_t esp
+	mov eax, esp
+	ret
+
+test_jump:
+	jmp 0x30:0
 	ret
 
 far_jump:
@@ -157,6 +160,19 @@ far_call:
 ; int cs
 	call FAR [esp + 4]
 	retf
+
+io_has_cpuid:
+; int (as bool)
+	pushfd
+	pushfd
+	xor DWORD [esp], 0x00200000
+	popfd
+	pushfd
+	pop eax
+	xor eax, [esp]
+	popfd
+	and eax, 0x00200000
+	ret
 
 exp_ud:
 ; void, exception

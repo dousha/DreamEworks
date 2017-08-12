@@ -9,8 +9,8 @@ static char* buf;
 static char* line;
 
 void shell_init(){
-	clrscr();
-	set_cursor(0, 0);
+	// clrscr();
+	cursor_follow();
 	buf = (char*) malloc(sizeof(char) * 8);
 	line = (char*) malloc(sizeof(char) * 82);
 }
@@ -30,7 +30,17 @@ void shell_loop(){
 	}
 }
 
+void shell_submit(){
+	// dbg
+}
+
 void shell_keyin(uint8_t mode, uint8_t code){
+	if(mode & STATE_CTRL) putchar('^');
+	if(mode & STATE_ALT) putchar('[');
+	if(charmap[code * 3] == '\n'){
+		shell_submit();
+		return;
+	}
 	if(mode & STATE_SHIFT){
 		putchar(charmap[code * 3 + 1]);
 	}else{
@@ -38,4 +48,3 @@ void shell_keyin(uint8_t mode, uint8_t code){
 	}
 	cursor_follow();
 }
-

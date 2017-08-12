@@ -18,7 +18,10 @@ struct task{
 	pid_t id;
 	uint8_t tick;
 	uint8_t status;
+	uint16_t gdt_selector;
+
 	tss* tss;
+	uint16_t tss_num;
 } __attribute__((packed))
 task;
 
@@ -46,7 +49,7 @@ task_manager;
 extern task_manager* task_man_get();
 extern size_t task_init(size_t);
 extern void task_finalize();
-extern pid_t task_create(void*, void*);
+extern pid_t task_create(void*, void*, void*);
 extern void task_switch(pid_t);
 extern void task_sleep(pid_t);
 extern void task_wake(pid_t);
@@ -59,4 +62,3 @@ extern void delay_poll();
 extern void dbg_freeze(uint32_t);
 
 #endif
-

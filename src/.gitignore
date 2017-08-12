@@ -1,9 +1,0 @@
-*.o
-../*
-*.bin
-*.pkg
-*.exu
-/hosttools/*.img
-/hosttools/*.pkg
-/hosttools/*.o
-/hosttools/edhd

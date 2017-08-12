@@ -57,7 +57,7 @@ init_8259a:
 	mov al, 0x04 ; ir2 -> slave 8259
 	out 0x21, al ; main, icw3
 	call io_delay
-	
+
 	; icw3
 	; slave
 	; 7
@@ -75,7 +75,7 @@ init_8259a:
 
 	out 0xa1, al ; slave, icw4
 	call io_delay
-	
+
 	; ocw1: int 27 ~ 20
 	; clk: int 20
 	; kbd: int 21
@@ -89,7 +89,7 @@ init_8259a:
 			;0b11111111 ; no interrupt
 	out 0x21, al ; main, ocw1
 	call io_delay
-	
+
 	mov al, 0b11111111 ; no interrupt
 	out 0xa1, al
 	call io_delay
@@ -225,14 +225,7 @@ int_timer:
 	iretd
 
 int_task_tick:
-	cli
-	pushad ; push everything in stack
-	; the code above actually sent a tss to the C handler
-	call int_task_tick_hwnd
-	; now load the new tss
-	mov ax, 0x28
-	ltr ax ; load tss
-	sti
+	
 	iret
 
 int_user_0x80:

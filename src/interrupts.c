@@ -36,13 +36,13 @@ void int_kbd_hwnd(){
 
 void int_timer_hwnd(){
 	++((task_man_get())->uptime);
-	// task_tick();
 	delay_poll();
 	io_out8(0x20, 0x20);
+	task_tick();
 }
 
 void int_task_tick_hwnd(){
-	
+
 }
 
 void int_user_0x80_hwnd(){
@@ -52,7 +52,7 @@ void int_user_0x80_hwnd(){
 void int_exception_hwnd(int vec, int err, int eip, int cs, int eflags){
 	// The following functions called are guranteed to work
 	// when error occured
-	set_color(COLOR_WHITE, COLOR_RED);
+	set_color(COLOR_WHITE, COLOR_BLUE);
 	clrscr();
 	char buf[16];
 	puts("[INTR] Fatal exception occured\n");
@@ -68,4 +68,3 @@ void int_exception_hwnd(int vec, int err, int eip, int cs, int eflags){
 		puts("ERR = "); puts(buf); putchar('\n');
 	}
 }
-

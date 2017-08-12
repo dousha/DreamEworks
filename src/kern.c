@@ -9,6 +9,7 @@
 #include "keyboard.h"
 #include "task.h"
 #include "shell.h"
+#include "beep.h"
 
 static char *buf;
 

@@ -6,7 +6,7 @@
 [bits 16]
 [org 0x7c00]
 
-TOTAL_SECTORS equ 360 ; how many cylinders do we want to read?
+TOTAL_SECTORS equ 360 ; how many sectors do we want to read?
 ; 1 cylinder = 2 x 18 sectors = 2 x 18 x 512 bytes = 18432 bytes
 
 _stage1:
@@ -192,6 +192,8 @@ bad_boot:
 	mov si, die_msg
 	call printstr
 	jmp hang
+
+; ---------- data
 
 table_string:
 	db "#REC_TBL"

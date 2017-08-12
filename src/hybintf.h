@@ -30,15 +30,15 @@ extern uint32_t io_idtr_read(void);
 extern void io_idtr_write(uint32_t);
 extern uint32_t io_gdtr_read(void);
 extern void io_gdtr_write(uint32_t);
-extern void io_load_tss(void);
-extern void io_load_user_tss(void);
+extern void io_load_tss(uint32_t);
+extern uint32_t io_current_esp(void);
 
 extern void io_int_user(void);
 
 extern void far_jump(int, int);
+extern void test_jump();
 
 extern void exp_ud(void);
 extern void int_dbg(void);
 
 #endif
-
